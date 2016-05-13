@@ -541,6 +541,46 @@ mincWriteVolume.default <- function(buffer, output.filename, like.filename,
   
   return(invisible(NULL))
 }
+
+#' Write multiple MINC volumes
+#' 
+#' This function writes out multiple MINC files from a mutidimensional MINC object like those produced by \link{mincLm}.
+#' 
+#' @param mincMatrix The multidimentional MINC object to be written to file
+#' @param file_path The path to which the output volume is to be written
+#' @param file_prefix The prefix to be part of the filename. This precedes the name of the MINC object column
+#' @param which_column a regular expression denoting which column(s) to be written out see \link[base]{regex}. The default (".") outputs all the columns of the MINC matrix.
+#' 
+#' @details Filenames are constructed from the prefix, \code{file_prefix}, and the column names selected by \code{which_column}, as \code{file_prefix}_columnname.mnc in \code{file_path}
+#' @export 
+
+mincWriteVolumes <-
+  
+  function(mincMatrix, file_path, file_prefix, which_column="."){
+    
+    column_names <- 
+      colnames(mincMatrix) %>%
+      grep(which_column, ., value=TRUE)
+    
+    lapply(column_names, function(name) {
+      
+      file_name <- 
+        paste(file_prefix, name, sep="_") %>%
+        gsub("[^[:alnum:]]+","_", .) %>% 
+        gsub("_$|^_", "", .) %>%
+        paste(., ".mnc", sep="")
+      
+      path <- 
+        file.path(file_path, file_name)
+      
+      mincWriteVolume(mincMatrix, path, name) 
+    }) %>% 
+      
+      invisible
+  }
+
+return(invisible(NULL))
+
 ###########################################################################################
 
 
